@@ -1,27 +1,16 @@
 const express = require("express");
-const knex = require("knex");
+const db = require("./config/database");
 const app = express();
 
-const db = knex({
-	client: "pg",
-	connection: {
-		host: "127.0.0.1",
-		user: "sheldrickmayrant",
-		password: "",
-		database: "saywhat"
-	}
-});
-
-// body parser middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// test db connection
+db.authenticate().then(() => console.log("database connected now")).catch(err => "Error: " + err);
 
 app.get("/", (req, res) => {
-	res.json({ msg: "App connected" });
+	res.send("index page");
 });
 
-app.use("/register", require("./routes/register"));
+// user routes
+app.use("/users", require("./routes/users"));
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => console.log(`App is listening on port ${PORT}`));
+const port = 3000;
+app.listen(port, console.log("app listening on 3000"));
