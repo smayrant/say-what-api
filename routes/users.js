@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 const { check, validationResult } = require("express-validator");
 
 const knex = require("../config/database");
@@ -21,6 +22,10 @@ router.post(
 
 		const { username, email, password, account_created } = req.body;
 
+		const saltRounds = 10;
+		var salt = bcrypt.genSaltSync(saltRounds);
+		var hash = bcrypt.hashSync(password, salt);
+		console.log(hash);
 		// select all from the users table where the email or username equals the email or username from req.body. If a user is found, send a 400 status, otherwise, add the user to the DB.
 		knex("users")
 			.where({ email: email })
@@ -30,7 +35,7 @@ router.post(
 					return res.status(400).send("Username and/or email already has a registered account");
 				} else {
 					knex
-						.insert([ { username, email, password, account_created } ])
+						.insert([ { username, email, password: hash, account_created } ])
 						.into("users")
 						.then(res.status(200).send("User signed up"));
 				}
