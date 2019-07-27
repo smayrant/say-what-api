@@ -2,12 +2,12 @@ const express = require("express");
 const db = require("./config/database");
 const app = express();
 
-// test db connection
-db.authenticate().then(() => console.log("database connected now")).catch(err => "Error: " + err);
-
 app.get("/", (req, res) => {
 	res.send("index page");
 });
+
+// Init Middleware
+app.use(express.json({ extended: false }));
 
 // user routes
 app.use("/users", require("./routes/users"));

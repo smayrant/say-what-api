@@ -1,14 +1,10 @@
-const Sequelize = require("sequelize");
-
-// Option 1: Passing parameters separately
-module.exports = new Sequelize("saywhatDB", "sheldrickmayrant", "", {
-	host: "localhost",
-	dialect: "postgres",
-
-	pool: {
-		max: 5,
-		min: 0,
-		acquire: 30000,
-		idle: 10000
+const knex = require("knex")({
+	client: "pg",
+	connection: {
+		host: "127.0.0.1",
+		user: "sheldrickmayrant",
+		password: "",
+		database: "saywhatDB"
 	}
 });
+module.exports = knex;

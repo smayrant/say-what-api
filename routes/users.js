@@ -1,45 +1,42 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/Users");
+const { check, validationResult } = require("express-validator");
 
-// route to get all users
-router.get("/", (req, res) => {
-	User.findAll()
-		.then(users => {
-			console.log(users);
-			res.status(200).send("OK");
-		})
-		.catch(err => console.log(err));
-});
+const knex = require("../config/database");
 
-// route to retrieve an individual user
-router.get("/:id", (req, res) => {
-	res.send(data.users[req.params.id]);
-});
+// route to register a user, ensuring the username, email and password fields are properly filled in using the express validator.
+router.post(
+	"/",
+	[
+		check("username", "Please add a username").not().isEmpty(),
+		check("email", "Please include a valid email address").isEmail(),
+		check("password", "Please ensure your password has 8 or more characters").isLength({ min: 8 })
+	],
+	(req, res) => {
+		const errors = validationResult(req);
+		// if errors isn't empty, send a 400 status and the array of errors
+		if (!errors.isEmpty()) {
+			return res.status(400).json({ errors: errors.array() });
+		}
 
-// route to register a user
-router.post("/", (req, res) => {
-	const data = {
-		username: "tom",
-		email: "tom@gmail.com",
-		password: "123456",
-		bio: "Just browsing around",
-		posts: 1,
-		likes: 15
-	};
+		const { username, email, password, account_created } = req.body;
 
-	const { username, email, password, bio, posts, likes } = data;
-
-	User.create({
-		username,
-		email,
-		password,
-		bio,
-		posts,
-		likes
-	}).then(newUser => {
-		console.log(newUser);
-	});
-});
+		// select all from the users table where the email or username equals the email or username from req.body. If a user is found, send a 400 status, otherwise, add the user to the DB.
+		knex("users")
+			.where({ email: email })
+			.orWhere({ username: username })
+			.then(currentAccount => {
+				if (currentAccount.length > 0) {
+					return res.status(400).send("Username and/or email already has a registered account");
+				} else {
+					knex
+						.insert([ { username, email, password, account_created } ])
+						.into("users")
+						.then(res.status(200).send("User signed up"));
+				}
+			})
+			.catch(err => res.send(err));
+	}
+);
 
 module.exports = router;
