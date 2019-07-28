@@ -1,8 +1,14 @@
 const express = require("express");
-const db = require("./config/database");
+const helmet = require("helmet");
 const app = express();
 
+// utilizing helmet to secure the app by setting various HTTP headers
+app.use(helmet());
+
 app.get("/", (req, res) => {
+	res.set({
+		"Content-Security-Policy": "script-src 'self'"
+	});
 	res.send("index page");
 });
 

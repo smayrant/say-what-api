@@ -6,12 +6,19 @@ const dotenv = require("dotenv");
 const { check, validationResult } = require("express-validator");
 const knex = require("../config/database");
 const auth = require("../middleware/auth");
+const helmet = require("helmet");
+
+// utilizing helmet to secure the app by setting various HTTP headers
+router.use(helmet());
 
 // init dotenv
 dotenv.config();
 
 // route to retrieve authenticated
 router.get("/", auth, (req, res) => {
+	res.set({
+		"Content-Security-Policy": "script-src 'self'"
+	});
 	// select all from the users table where the id = the id stored in the request object that comes from the token payload from the auth function
 	knex("users")
 		.where("id", req.user)
@@ -30,6 +37,9 @@ router.post(
 		check("password", "Please ensure your password has 8 or more characters").isLength({ min: 8 })
 	],
 	(req, res) => {
+		res.set({
+			"Content-Security-Policy": "script-src 'self'"
+		});
 		const errors = validationResult(req);
 		// if errors isn't empty, send a 400 status and the array of errors
 		if (!errors.isEmpty()) {
@@ -62,6 +72,10 @@ router.post(
 	"/login",
 	[ check("email", "Please include a valid email address"), check("password", "Password is required") ],
 	(req, res) => {
+		res.set({
+			"Content-Security-Policy": "script-src 'self'"
+		});
+
 		const { email, password } = req.body;
 
 		// select all from the users table where the email from the DB matches the email from req.body. Using bcrypt to compare the password from req.body and the hashed password stored in the DB, return the user if passwords match, return a 400 status otherwise.
