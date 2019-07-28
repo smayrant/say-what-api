@@ -27,6 +27,7 @@ router.post(
 		var salt = bcrypt.genSaltSync(saltRounds);
 		var hash = bcrypt.hashSync(password, salt);
 
+		// insert the user into the DB using Knex
 		knex
 			.returning("*")
 			.insert([ { username, email, password: hash, account_created: new Date() } ])

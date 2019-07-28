@@ -2,19 +2,19 @@ const express = require("express");
 const router = express.Router();
 const knex = require("../config/database");
 
-router.post("/:id", (req, res) => {
-	const post = {
-		content: "this is a post",
-		created_at: new Date(),
-		post_owner: req.params.id,
-		title: "post title"
-	};
+router.post("/", (req, res) => {
+	const { content, post_owner, title } = req.body;
 
-	const { content, created_at, post_owner, title } = post;
+	// insert the post information into the posts table using Knex. Then increase the posts field from the users table for the post owner by 1.
 	knex
-		.insert([ { content, created_at, post_owner, title } ])
+		.returning("post_owner")
+		.insert([ { content, created_at: new Date(), post_owner, title } ])
 		.into("posts")
-		.then(res.status(200).send("post created"))
+		.then(post_owner => {
+			knex("users").where("id", "=", post_owner[0]).increment("posts", 1).returning("posts").then(posts => {
+				res.json(posts);
+			});
+		})
 		.catch(err => err);
 });
 
