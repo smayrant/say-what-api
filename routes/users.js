@@ -10,11 +10,15 @@ const auth = require("../middleware/auth");
 // init dotenv
 dotenv.config();
 
+// route to retrieve authenticated
 router.get("/", auth, (req, res) => {
 	// select all from the users table where the id = the id stored in the request object that comes from the token payload from the auth function
-	knex("users").where("id", req.user).then(user => {
-		res.send(user[0]);
-	});
+	knex("users")
+		.where("id", req.user)
+		.then(user => {
+			res.json(user[0]);
+		})
+		.catch(err => res.send(err));
 });
 
 // route to register a user, ensuring the username, email and password fields are properly filled in using the express validator.
