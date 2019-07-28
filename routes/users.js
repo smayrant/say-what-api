@@ -20,27 +20,19 @@ router.post(
 			return res.status(400).json({ errors: errors.array() });
 		}
 
-		const { username, email, password, account_created } = req.body;
+		const { username, email, password } = req.body;
 
+		// bcrypt configuration
 		const saltRounds = 10;
 		var salt = bcrypt.genSaltSync(saltRounds);
 		var hash = bcrypt.hashSync(password, salt);
-		console.log(hash);
-		// select all from the users table where the email or username equals the email or username from req.body. If a user is found, send a 400 status, otherwise, add the user to the DB.
-		knex("users")
-			.where({ email: email })
-			.orWhere({ username: username })
-			.then(currentAccount => {
-				if (currentAccount.length > 0) {
-					return res.status(400).send("Username and/or email already has a registered account");
-				} else {
-					knex
-						.insert([ { username, email, password: hash, account_created } ])
-						.into("users")
-						.then(res.status(200).send("User signed up"));
-				}
-			})
-			.catch(err => res.send(err));
+
+		knex
+			.returning("*")
+			.insert([ { username, email, password: hash, account_created: new Date() } ])
+			.into("users")
+			.then(user => res.status(200).json(user[0]))
+			.catch(err => res.status(400).json(err));
 	}
 );
 
