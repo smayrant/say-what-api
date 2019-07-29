@@ -5,14 +5,17 @@ const auth = require("../middleware/auth");
 const helmet = require("helmet");
 
 // utilizing helmet to secure the app by setting various HTTP headers
-router.use(helmet());
+router.use(
+	helmet.contentSecurityPolicy({
+		directives: {
+			defaultSrc: [ "'self'" ],
+			styleSrc: [ "'self'" ]
+		}
+	})
+);
 
 // route to create a new post
 router.post("/", auth, (req, res) => {
-	res.set({
-		"Content-Security-Policy": "script-src 'self'"
-	});
-
 	const { content, title } = req.body;
 
 	// insert the post information into the posts table using Knex. Then increase the posts field from the users table for the post owner by 1.
@@ -30,9 +33,6 @@ router.post("/", auth, (req, res) => {
 
 // retrieve all posts
 router.get("/", (req, res) => {
-	res.set({
-		"Content-Security-Policy": "script-src 'self'"
-	});
 	knex.select().table("posts").then(posts => {
 		res.send(posts);
 	});
@@ -40,9 +40,6 @@ router.get("/", (req, res) => {
 
 // retrieve all posts from the posts' owner. The owner's id comes from req.user which comes from the auth middleware function
 router.get("/user-posts", auth, (req, res) => {
-	res.set({
-		"Content-Security-Policy": "script-src 'self'"
-	});
 	knex("posts").where("post_owner", req.user).then(user => {
 		res.send(user);
 	});

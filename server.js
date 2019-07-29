@@ -2,8 +2,15 @@ const express = require("express");
 const helmet = require("helmet");
 const app = express();
 
-// utilizing helmet to secure the app by setting various HTTP headers
-app.use(helmet());
+// utilizing helmet to secure the app by setting various HTTP headers, including the non-default CSP header
+app.use(
+	helmet.contentSecurityPolicy({
+		directives: {
+			defaultSrc: [ "'self'" ],
+			styleSrc: [ "'self'" ]
+		}
+	})
+);
 
 app.get("/", (req, res) => {
 	res.set({

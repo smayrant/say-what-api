@@ -8,8 +8,15 @@ const knex = require("../config/database");
 const auth = require("../middleware/auth");
 const helmet = require("helmet");
 
-// utilizing helmet to secure the app by setting various HTTP headers
-router.use(helmet());
+// utilizing helmet to secure the app by setting various HTTP headers, including the non-default CSP header
+router.use(
+	helmet.contentSecurityPolicy({
+		directives: {
+			defaultSrc: [ "'self'" ],
+			styleSrc: [ "'self'" ]
+		}
+	})
+);
 
 // init dotenv
 dotenv.config();
