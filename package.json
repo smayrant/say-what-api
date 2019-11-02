@@ -19,7 +19,7 @@
 		"jsonwebtoken": "^8.5.1",
 		"knex": "^0.19.1",
 		"pg": "^7.11.0",
-		"sequelize": "^5.10.2"
+		"sequelize": "^5.15.1"
 	},
 	"devDependencies": {
 		"nodemon": "^1.19.1"
